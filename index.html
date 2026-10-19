@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Herramientas de apoyo para la programación académica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="https://gestionapp.medellin.unal.edu.co/cdn/assets/favicon.ico">
+  <style>
+    :root {
+      --verde: #677d29;
+      --verde-oscuro: #516320;
+      --verde-claro: #f4fddd;
+      --amarillo: #EAAD13;
+      --lima: #A9D12C;
+      --gris: #464646;
+      --negro: #1D1D1B;
+      --linea: #e3e3e0;
+      --fondo: #f4f4f2;
+      --tinta: #1D1D1B;
+      --tinta-2: #5a5e60;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--tinta);
+      background: var(--fondo);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Barra superior */
+    .barra {
+      flex: 0 0 auto;
+      background: var(--verde);
+      color: #fff;
+    }
+    .barra-interior {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      padding: 1rem 1.75rem;
+    }
+    .escudo {
+      flex: 0 0 auto;
+      width: 3.4rem;
+      height: 3.4rem;
+      border-radius: 50%;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .escudo img { width: 2.9rem; height: 2.9rem; object-fit: contain; display: block; }
+    .escudo img[hidden] { display: none; }
+    .titulos { min-width: 0; }
+    .titulos h1 {
+      margin: 0;
+      font-size: 1.55rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      line-height: 1.15;
+    }
+    .titulos p {
+      margin: .3rem 0 0;
+      font-size: .9rem;
+      line-height: 1.3;
+      color: rgba(255, 255, 255, .82);
+    }
+    .franja { display: flex; height: .3rem; }
+    .franja i { display: block; flex: 1 1 0; }
+    .franja i:nth-child(1) { background: var(--amarillo); flex-grow: 3; }
+    .franja i:nth-child(2) { background: var(--lima); flex-grow: 2; }
+    .franja i:nth-child(3) { background: var(--gris); flex-grow: 1; }
+    .franja i:nth-child(4) { background: var(--negro); flex-grow: 1; }
+
+    /* Recuadro de selección de tablero */
+    .selector {
+      flex: 0 0 auto;
+      padding: .75rem 1rem;
+      background: var(--fondo);
+    }
+    .selector-caja {
+      background: #fff;
+      border: 1px solid var(--linea);
+      border-radius: .75rem;
+      padding: .6rem .9rem .8rem;
+    }
+    .selector-caja h2 {
+      margin: 0 0 .45rem;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--tinta-2);
+    }
+
+    .tablero {
+      flex: 1 1 auto;
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      background: #fff;
+      border-top: 1px solid var(--linea);
+    }
+    .tablero iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+      display: none;
+    }
+    .tablero iframe.activo { display: block; }
+    .cargando {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: .9rem;
+      color: var(--tinta-2);
+      pointer-events: none;
+    }
+    .cargando[hidden] { display: none; }
+
+    .opciones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+    .opcion {
+      appearance: none;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      text-align: left;
+      font: inherit;
+      color: var(--tinta);
+      background: #fff;
+      border: 1px solid var(--linea);
+      border-radius: .6rem;
+      padding: .55rem .85rem;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .opcion:hover { border-color: var(--verde); }
+    .opcion:focus-visible { outline: 2px solid #2ba6cb; outline-offset: 2px; }
+    .marca {
+      flex: 0 0 auto;
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--negro);
+      background: var(--c);
+    }
+    .nombre { font-size: .92rem; font-weight: 500; line-height: 1.25; }
+    .opcion[aria-checked="true"] {
+      background: var(--verde);
+      border-color: var(--verde);
+      color: #fff;
+    }
+    .opcion[aria-checked="true"] .nombre { font-weight: 600; }
+
+    @media (max-width: 900px) {
+      .barra-interior { padding: .8rem 1rem; gap: .8rem; }
+      .escudo { width: 2.8rem; height: 2.8rem; }
+      .escudo img { width: 2.4rem; height: 2.4rem; }
+      .titulos h1 { font-size: 1.15rem; }
+      .titulos p { font-size: .8rem; }
+      .selector { padding: .5rem .6rem; }
+      .selector-caja { padding: .5rem .6rem .6rem; }
+      .opciones { display: flex; overflow-x: auto; gap: .5rem; }
+      .opcion { flex: 0 0 auto; width: auto; padding: .45rem .7rem; }
+      .marca { width: 1.5rem; height: 1.5rem; font-size: .75rem; }
+      .nombre { white-space: nowrap; font-size: .85rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <div class="barra-interior">
+      <div class="escudo">
+        <img id="escudo" src="https://gestionapp.medellin.unal.edu.co/cdn/assets/images/logo_unal_circle.png" alt="Escudo de la Universidad Nacional de Colombia">
+      </div>
+      <div class="titulos">
+        <h1>Herramientas de apoyo para la programación académica</h1>
+        <p>Universidad Nacional de Colombia, Sede Medellín</p>
+      </div>
+    </div>
+    <div class="franja" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  </header>
+
+  <nav class="selector" aria-label="Selección de tablero">
+    <div class="selector-caja">
+      <h2 id="rotulo-panel">Seleccione un tablero</h2>
+      <div class="opciones" role="radiogroup" aria-labelledby="rotulo-panel" id="opciones"></div>
+    </div>
+  </nav>
+
+  <main class="tablero" id="tablero">
+    <div class="cargando" id="cargando" hidden>Cargando el tablero…</div>
+  </main>
+
+  <script>
+    var TABLEROS = [
+      { id: 'rii', nombre: 'Registro de intención de inscripción - RII', ruta: 'rii/index.html', color: '#A9D12C' },
+      { id: 'oferta', nombre: 'Oferta de asignaturas', ruta: 'oferta/index.html', color: '#EAAD13' },
+      { id: 'resultados', nombre: 'Resultados académicos', ruta: 'resultados/index.html', color: '#A9D12C' }
+    ];
+
+    var contenedor = document.getElementById('tablero');
+    var cargando = document.getElementById('cargando');
+    var lista = document.getElementById('opciones');
+    var marcos = {};
+    var botones = [];
+    var actual = -1;
+
+    var escudo = document.getElementById('escudo');
+    escudo.addEventListener('error', function () { escudo.parentNode.style.display = 'none'; });
+
+    function inicial() {
+      var h = (location.hash || '').replace('#', '');
+      for (var i = 0; i < TABLEROS.length; i++) if (TABLEROS[i].id === h) return i;
+      return 0;
+    }
+
+    function marco(t) {
+      if (marcos[t.id]) return marcos[t.id];
+      var f = document.createElement('iframe');
+      f.title = t.nombre;
+      f.src = t.ruta;
+      cargando.hidden = false;
+      f.addEventListener('load', function () { cargando.hidden = true; });
+      contenedor.appendChild(f);
+      marcos[t.id] = f;
+      return f;
+    }
+
+    function elegir(i, enfocar) {
+      if (i === actual) return;
+      actual = i;
+      var t = TABLEROS[i];
+      botones.forEach(function (b, k) {
+        b.setAttribute('aria-checked', k === i ? 'true' : 'false');
+        b.tabIndex = k === i ? 0 : -1;
+      });
+      Object.keys(marcos).forEach(function (k) { marcos[k].classList.remove('activo'); });
+      marco(t).classList.add('activo');
+      document.title = t.nombre + ' | Herramientas de apoyo para la programación académica';
+      try { history.replaceState(null, '', '#' + t.id); } catch (e) {}
+      if (enfocar) botones[i].focus();
+    }
+
+    TABLEROS.forEach(function (t, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opcion';
+      b.setAttribute('role', 'radio');
+      var m = document.createElement('span');
+      m.className = 'marca';
+      m.style.setProperty('--c', t.color);
+      m.textContent = String(i + 1);
+      m.setAttribute('aria-hidden', 'true');
+      var n = document.createElement('span');
+      n.className = 'nombre';
+      n.textContent = t.nombre;
+      b.appendChild(m);
+      b.appendChild(n);
+      b.addEventListener('click', function () { elegir(i, false); });
+      b.addEventListener('keydown', function (e) {
+        var s = null;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') s = (i + 1) % TABLEROS.length;
+        if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') s = (i + TABLEROS.length - 1) % TABLEROS.length;
+        if (s !== null) { e.preventDefault(); elegir(s, true); }
+      });
+      lista.appendChild(b);
+      botones.push(b);
+    });
+
+    elegir(inicial(), false);
+  </script>
+</body>
+</html>
